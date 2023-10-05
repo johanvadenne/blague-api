@@ -39,6 +39,7 @@ class Blague extends API {
         this.tabBlague = [];
         this.tabListeBlagueNoire = [];
         this.tableau = document.getElementById("corpTableauBlague")
+        this.voirTout = document.getElementById("voir_tout")
 
         this.chergementBlagueStocker();
     }
@@ -219,7 +220,6 @@ class Blague extends API {
             this.tabBlague[ind].infoBlague.elementLigneHTML.Response.innerHTML = this.tabBlague[ind].infoBlague.delivery;
             this.tabBlague.splice(ind, 1);
             this.enregistrer();
-            break;
         }
     }
 }
