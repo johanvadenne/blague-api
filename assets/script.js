@@ -38,16 +38,16 @@ class Blague extends API {
         this.numBlague = 0;
         this.tabBlague = [];
         this.tabListeBlagueNoire = [];
+        this.tabListeBlagueNoire = recupBlagueBanni;
         this.tableau = document.getElementById("corpTableauBlague")
-        this.voirTout = document.getElementById("voir_tout")
-
+        this.checkboxVoirTout = document.getElementById("voir_tout")
         this.chergementBlagueStocker();
+        this.enregistrer();
     }
 
     // affiche les blague en mémoire
     chergementBlagueStocker() {
         for (let ind = 0; ind < recupBlague.length; ind++) {
-            console.log(recupBlague[ind].infoBlague)
             this.afficheBlague(recupBlague[ind].infoBlague);
         }
     }
@@ -119,6 +119,7 @@ class Blague extends API {
 
         // enregistrement
         this.tabBlague.push({ infoBlague });
+        console.log(this.tabBlague)
         this.enregistrer();
     }
 
@@ -216,11 +217,20 @@ class Blague extends API {
     }
 
     voirTout() {
-        for (let ind = 0; ind < this.tabBlague.length; ind++) {
-            this.tabBlague[ind].infoBlague.elementLigneHTML.Response.innerHTML = this.tabBlague[ind].infoBlague.delivery;
-            this.tabBlague.splice(ind, 1);
-            this.enregistrer();
+        if (this.checkboxVoirTout.checked) {
+            for (let ind = 0; ind < this.tabBlague.length; ind++) {
+                this.tabBlague[ind].infoBlague.elementLigneHTML.Reponse.innerHTML = this.tabBlague[ind].infoBlague.delivery;
+                this.tabBlague[ind].infoBlague.elementLigneHTML.Voir.checked = true;
+                this.enregistrer();
+            }
+        } else {
+            for (let ind = 0; ind < this.tabBlague.length; ind++) {
+                this.tabBlague[ind].infoBlague.elementLigneHTML.Reponse.innerHTML = this.tabBlague[ind].infoBlague.reponseCacher;
+                this.tabBlague[ind].infoBlague.elementLigneHTML.Voir.checked = false;
+                this.enregistrer();
+            }
         }
+
     }
 }
 
