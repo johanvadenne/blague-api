@@ -1,0 +1,33 @@
+body {
+    background-image: url('../images/fond.jpeg');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #424b5a;
+}
+
+.oeil:hover {
+    cursor: pointer;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+}
+
+#contenat_bouton {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#contenat_bouton .bouton_action {
+    margin: 1%;
+}
+
+#contenat_bouton .oeil {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    padding: 0.5%;
+}

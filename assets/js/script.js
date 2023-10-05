@@ -1,3 +1,5 @@
+
+
 // init
 const urlBlague = "https://v2.jokeapi.dev/joke/Any?lang=fr"
 const recupBlague = JSON.parse(localStorage.getItem("blague"));
@@ -38,22 +40,34 @@ class Blague extends API {
         this.numBlague = 0;
         this.tabBlague = [];
         this.tabListeBlagueNoire = [];
-        this.tabListeBlagueNoire = recupBlagueBanni;
         this.tableau = document.getElementById("corpTableauBlague")
-        this.checkboxVoirTout = document.getElementById("voir_tout")
+        this.imgVoirTout = document.getElementById("voir_tout")
         this.chergementBlagueStocker();
-        this.enregistrer();
     }
 
     // affiche les blague en mémoire
     chergementBlagueStocker() {
-        for (let ind = 0; ind < recupBlague.length; ind++) {
-            this.afficheBlague(recupBlague[ind].infoBlague);
+        if (recupBlagueBanni != null) {
+            this.tabListeBlagueNoire.push(recupBlagueBanni);
         }
+
+        if (recupBlague != null) {
+            for (let ind = 0; ind < recupBlague.length; ind++) {
+                this.afficheBlague(recupBlague[ind].infoBlague);
+            }
+        }
+
+        
     }
 
     // rajoute une nouvelle blague
     afficheBlague(blague) {
+
+        if (this.tabListeBlagueNoire.find((blagueAjoutTest) => blagueAjoutTest.id === blague.id)) {
+            this.uneNouvelleBlague();
+            console.log("123456789")
+            return;
+        }
 
         // incrémente de un 
         this.numBlague++;
@@ -75,19 +89,20 @@ class Blague extends API {
         const nouvelleLigneAjouterDansLaListeNoire = nouvelleLigne.insertCell();
 
         // créée l'input de type checkbox
-        const checkboxVoir = document.createElement("input");
-        checkboxVoir.setAttribute("type", "checkbox");
-        checkboxVoir.id = "checkbox" + blague.id;
-        nouvelleLigneVoir.appendChild(checkboxVoir);
+        const imgVoir = document.createElement("img");
+        imgVoir.className = "oeil";
+        nouvelleLigneVoir.appendChild(imgVoir);
 
         // créée des bouton// Créer des boutons pour les colonnes "Supprimer" et "Ajouter dans la liste noire"
         const boutonSupprimer = document.createElement("button");
         const boutonAjouterListeNoire = document.createElement("button");
+        boutonSupprimer.className = "btn btn-danger mb-3"
+        boutonAjouterListeNoire.className = "btn btn-dark mb-3"
         nouvelleLigneSupprimer.appendChild(boutonSupprimer);
         nouvelleLigneAjouterDansLaListeNoire.appendChild(boutonAjouterListeNoire);
 
         // ajout un écouteur onclick
-        checkboxVoir.onclick = () => MesBlague.cacher(blague.id);
+        imgVoir.onclick = () => MesBlague.cacher(blague.id);
         boutonSupprimer.onclick = () => MesBlague.supprimerBlague(blague.id);
         boutonAjouterListeNoire.onclick = () => MesBlague.ajoutListeNoire(blague.id);
 
@@ -95,13 +110,33 @@ class Blague extends API {
         nouvelleLigneNumero.innerHTML = this.numBlague;
         nouvelleLigneBlague.innerHTML = blague.setup;
         const reponseCacher = "*".repeat(blague.delivery.length);
-        nouvelleLigneReponse.innerHTML = reponseCacher;
-        boutonSupprimer.innerHTML = "❌";
-        boutonAjouterListeNoire.innerHTML = "📜";
+        boutonSupprimer.innerHTML = "supprimer";
+        boutonAjouterListeNoire.innerHTML = "Ajouter dans la liste noire";
+
+
+        if (this.imgVoirTout.src.indexOf("images/oeilOuvert.png") != -1) {
+            nouvelleLigneReponse.innerHTML = blague.delivery;
+            imgVoir.src = "./assets/images/oeilOuvert.png";
+        } else {
+            nouvelleLigneReponse.innerHTML = reponseCacher;
+            imgVoir.src = "./assets/images/oeilFermer.png";
+        }
+
+        imgVoir.addEventListener("click", (event) => {
+            console.log(imgVoir.src)
+            if (imgVoir.src.indexOf("images/oeilOuvert.png") != -1) {
+                imgVoir.src = "./assets/images/oeilFermer.png";
+                console.log("1")
+            }
+            else {
+                imgVoir.src = "./assets/images/oeilOuvert.png";
+                console.log("2")
+            }
+        });
+          
 
         // enregistre les information dans un tableau
         const infoBlague = {
-            idBlague: blague.id,
             setup: blague.setup,
             delivery: blague.delivery,
             reponseCacher: reponseCacher,
@@ -111,7 +146,7 @@ class Blague extends API {
                 Numero: nouvelleLigneNumero,
                 Blague: nouvelleLigneBlague,
                 Reponse: nouvelleLigneReponse,
-                Voir: checkboxVoir,
+                Voir: imgVoir,
                 Supprimer: nouvelleLigneSupprimer,
                 DansLaListeNoire: nouvelleLigneAjouterDansLaListeNoire,
             }
@@ -119,7 +154,6 @@ class Blague extends API {
 
         // enregistrement
         this.tabBlague.push({ infoBlague });
-        console.log(this.tabBlague)
         this.enregistrer();
     }
 
@@ -148,17 +182,17 @@ class Blague extends API {
     }
 
     // renvoie la valeur booléen de la checkbox
-    checkboxVoir(idBlague) {
+    imgVoir(idBlague) {
         return this.SelectionneBlague(idBlague)
             .then(() => {
-                return this.blagueTrouver.elementLigneHTML.Voir.checked
+                return this.blagueTrouver.elementLigneHTML.Voir.src.indexOf("images/oeilOuvert.png") == -1
             })
     }
 
     async cacher(idBlague) {
         const blague = await this.SelectionneBlague(idBlague);
 
-        if (await this.checkboxVoir(idBlague)) {
+        if (await this.imgVoir(idBlague)) {
             blague.elementLigneHTML.Reponse.innerHTML = blague.delivery;
             this.enregistrer()
         } else {
@@ -217,23 +251,38 @@ class Blague extends API {
     }
 
     voirTout() {
-        if (this.checkboxVoirTout.checked) {
+        if (this.imgVoirTout.src.indexOf("images/oeilFermer.png") != -1) {
             for (let ind = 0; ind < this.tabBlague.length; ind++) {
                 this.tabBlague[ind].infoBlague.elementLigneHTML.Reponse.innerHTML = this.tabBlague[ind].infoBlague.delivery;
-                this.tabBlague[ind].infoBlague.elementLigneHTML.Voir.checked = true;
+                this.tabBlague[ind].infoBlague.elementLigneHTML.Voir.src = "./assets/images/oeilOuvert.png";
+                this.imgVoirTout.src = "./assets/images/oeilOuvert.png";
                 this.enregistrer();
             }
         } else {
             for (let ind = 0; ind < this.tabBlague.length; ind++) {
                 this.tabBlague[ind].infoBlague.elementLigneHTML.Reponse.innerHTML = this.tabBlague[ind].infoBlague.reponseCacher;
-                this.tabBlague[ind].infoBlague.elementLigneHTML.Voir.checked = false;
+                this.tabBlague[ind].infoBlague.elementLigneHTML.Voir.src = "./assets/images/oeilFermer.png";
+                this.imgVoirTout.src = "./assets/images/oeilFermer.png";
                 this.enregistrer();
             }
         }
+    }
 
+    reinisialiser() {
+        localStorage.removeItem("blague");
+        localStorage.removeItem("listeBlagueNoire");
+        this.supprimerTout();
     }
 }
 
 window.onload = function() {
-    MesBlague = new Blague;
+    try {
+        MesBlague = new Blague;
+    }
+    catch(erreur) {
+        localStorage.removeItem("blague");
+        localStorage.removeItem("listeBlagueNoire");
+        console.log("erreur: "+ erreur)
+    }
+    
 }
