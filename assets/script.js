@@ -1,19 +1,19 @@
+// init
 const urlBlague = "https://v2.jokeapi.dev/joke/Any?lang=fr"
-let numBlague = 0;
-const recupBlague = localStorage.getItem("blague");
-console.log(recupBlague);
-const recupBlagueBanni = localStorage.getItem("blagueBanni");
-console.log(recupBlagueBanni);
+const recupBlague = JSON.parse(localStorage.getItem("blague"));
+console.log(recupBlague); // à retirer
+const recupBlagueBanni = JSON.parse(localStorage.getItem("listeBlagueNoire"));
+console.log(recupBlagueBanni); // à retirer
+var MesBlague;
 
 
 class API {
 
     constructor() {
-        this.numBlague = 0;
         this.tabBlague = [];
     }
 
-    // FR: fait une requette GET à une API
+    // FR: effectue une requette GET à une API
     // EN: makes a GET request to an API
     appelleAPI(url) {
         return fetch(url)
@@ -32,14 +32,29 @@ class API {
 
 class Blague extends API {
 
+    // init
     constructor() {
         super();
         this.numBlague = 0;
         this.tabBlague = [];
+        this.tabListeBlagueNoire = [];
+        this.tableau = document.getElementById("corpTableauBlague")
+
+        this.chergementBlagueStocker();
     }
 
+    // affiche les blague en mémoire
+    chergementBlagueStocker() {
+        for (let ind = 0; ind < recupBlague.length; ind++) {
+            console.log(recupBlague[ind].infoBlague)
+            this.afficheBlague(recupBlague[ind].infoBlague);
+        }
+    }
+
+    // rajoute une nouvelle blague
     afficheBlague(blague) {
-        // init
+
+        // incrémente de un 
         this.numBlague++;
 
         // récupère le corp du tableau
@@ -48,7 +63,7 @@ class Blague extends API {
         // créer une ligne
         const nouvelleLigne = tableau.insertRow(0);
         // attribut un id
-        nouvelleLigne.id = "ligneBlague" + numBlague;
+        nouvelleLigne.id = "ligneBlague" + this.numBlague;
 
         // insert les colonnes
         const nouvelleLigneNumero = nouvelleLigne.insertCell();
@@ -57,8 +72,6 @@ class Blague extends API {
         const nouvelleLigneVoir = nouvelleLigne.insertCell();
         const nouvelleLigneSupprimer = nouvelleLigne.insertCell();
         const nouvelleLigneAjouterDansLaListeNoire = nouvelleLigne.insertCell();
-        const nouvelleLigneReponseCacher = nouvelleLigne.insertCell();
-        const nouvelleLigneId = nouvelleLigne.insertCell();
 
         // créée l'input de type checkbox
         const checkboxVoir = document.createElement("input");
@@ -72,52 +85,43 @@ class Blague extends API {
         nouvelleLigneSupprimer.appendChild(boutonSupprimer);
         nouvelleLigneAjouterDansLaListeNoire.appendChild(boutonAjouterListeNoire);
 
-
-        // attribue une classe
-        nouvelleLigneId.className = "cacher";
-        nouvelleLigneReponseCacher.className = "cacher";
-
         // ajout un écouteur onclick
         checkboxVoir.onclick = () => MesBlague.cacher(blague.id);
         boutonSupprimer.onclick = () => MesBlague.supprimerBlague(blague.id);
         boutonAjouterListeNoire.onclick = () => MesBlague.ajoutListeNoire(blague.id);
 
         // insert les textes
-        nouvelleLigneNumero.innerHTML = numBlague;
+        nouvelleLigneNumero.innerHTML = this.numBlague;
         nouvelleLigneBlague.innerHTML = blague.setup;
-        nouvelleLigneReponseCacher.innerHTML = blague.delivery;
-        nouvelleLigneId.innerHTML = blague.id;
+        const reponseCacher = "*".repeat(blague.delivery.length);
+        nouvelleLigneReponse.innerHTML = reponseCacher;
         boutonSupprimer.innerHTML = "❌";
         boutonAjouterListeNoire.innerHTML = "📜";
-        
-        // cache la réponse
-        const nombreEtoile = nouvelleLigneReponseCacher.innerHTML.length;
-        nouvelleLigneReponse.innerHTML = "*".repeat(nombreEtoile);
-        this.enregistrer();
 
         // enregistre les information dans un tableau
         const infoBlague = {
             idBlague: blague.id,
-            blague: blague.setup,
-            blagueReponse: blague.delivery,
-            ban: false,
-            elementLigneHTML : {
+            setup: blague.setup,
+            delivery: blague.delivery,
+            reponseCacher: reponseCacher,
+            id: blague.id,
+            elementLigneHTML: {
+                ligne: nouvelleLigne,
                 Numero: nouvelleLigneNumero,
                 Blague: nouvelleLigneBlague,
                 Reponse: nouvelleLigneReponse,
                 Voir: checkboxVoir,
                 Supprimer: nouvelleLigneSupprimer,
                 DansLaListeNoire: nouvelleLigneAjouterDansLaListeNoire,
-                reponseVisible: nouvelleLigneReponseCacher,
-                ReponseCacher: "*".repeat(nouvelleLigneReponseCacher.innerHTML.length),
-                Id: nouvelleLigneId
             }
         }
 
-        this.tabBlague.push({infoBlague});
+        // enregistrement
+        this.tabBlague.push({ infoBlague });
+        this.enregistrer();
     }
 
-
+    // effectue une requette GET a jokeapi
     uneNouvelleBlague() {
         this.appelleAPI(urlBlague)
             .then(blague => {
@@ -125,110 +129,101 @@ class Blague extends API {
             });
     }
 
+    // selectionne la blague selectionné
     SelectionneBlague(idBlague) {
         return new Promise((resolve, reject) => {
             if (this.blagueTrouver) {
-                console.log("1")
-                if (this.blagueTrouver.idBlague != idBlague) {
-                    console.log("2")
-                    this.blagueTrouver = this.tabBlague.find((blagueSelect) => blagueSelect.infoBlague.idBlague === idBlague);
+                if (this.blagueTrouver.id != idBlague) {
+                    this.blagueTrouver = this.tabBlague.find((blagueSelect) => blagueSelect.infoBlague.id === idBlague);
                     this.blagueTrouver = this.blagueTrouver.infoBlague
                 }
-            }
-            else {
-                console.log("3")
-                this.blagueTrouver = this.tabBlague.find((blagueSelect) => blagueSelect.infoBlague.idBlague === idBlague);
+            } else {
+                this.blagueTrouver = this.tabBlague.find((blagueSelect) => blagueSelect.infoBlague.id === idBlague);
                 this.blagueTrouver = this.blagueTrouver.infoBlague
             }
-            console.log("4")
             resolve(this.blagueTrouver);
         });
     }
 
+    // renvoie la valeur booléen de la checkbox
     checkboxVoir(idBlague) {
         return this.SelectionneBlague(idBlague)
-        .then(() => {
-            return this.blagueTrouver.elementLigneHTML.Voir.checked
-        })
+            .then(() => {
+                return this.blagueTrouver.elementLigneHTML.Voir.checked
+            })
     }
 
-    AfficheReponse(idBlague) {
-        return this.SelectionneBlague(idBlague)
-        .then(() => {
-            return this.blagueTrouver.elementLigneHTML.Reponse.innerHTML
-        })
+    async cacher(idBlague) {
+        const blague = await this.SelectionneBlague(idBlague);
+
+        if (await this.checkboxVoir(idBlague)) {
+            blague.elementLigneHTML.Reponse.innerHTML = blague.delivery;
+            this.enregistrer()
+        } else {
+            blague.elementLigneHTML.Reponse.innerHTML = blague.reponseCacher;
+            this.enregistrer()
+        }
     }
 
-    reponseVisible(idBlague) {
-    return this.SelectionneBlague(idBlague)
-    .then(() => {
-        return this.blagueTrouver.elementLigneHTML.reponseVisible.innerHTML;
-    })
-}
-
-reponseCacher(idBlague) {
-    return this.SelectionneBlague(idBlague)
-    .then(() => {
-        return this.blagueTrouver.elementLigneHTML.ReponseCacher;
-    })
-}
-
-async cacher(idBlague) {
-    const blague = await this.SelectionneBlague(idBlague);
-    
-    if (await this.checkboxVoir(idBlague)) {
-        console.log(await this.reponseVisible(idBlague))
-        blague.elementLigneHTML.Reponse.innerHTML = await this.reponseVisible(idBlague);
-    } else {
-        console.log(await this.reponseCacher(idBlague))
-        blague.elementLigneHTML.Reponse.innerHTML = await this.reponseCacher(idBlague);
-    }
-}
-    
+    // supprimer une ligne
     supprimerBlague(idBlague) {
-        const ligneBlague = document.getElementById("ligneBlague" + idBlague);
-        ligneBlague.remove();
-        this.enregistrer();
-    }
-    
-    supprimerTout() {
-        const tableau = document.getElementById("corpTableauBlague")
-        tableau.innerHTML = "";
-        this.enregistrer();
-    }
-    
-    ajoutListeNoire(idBlague) {
-        const ligneBlague = document.getElementById("ligneBlague" + idBlague);
-        var colonnes = ligneBlague.children;
-        var blagueListeNoire = [];
-    
-        const blagueABanir = {
-            blague: colonnes[1].innerHTML,
-            reponse: colonnes[6].innerHTML,
-            id: colonnes[7].innerHTML
-        }
-        blagueListeNoire.push(blagueABanir)
-        window.localStorage.setItem("blagueBanni", JSON.stringify(blagueListeNoire));
-    
-        supprimerBlague(idBlague)
-    }
-    
-    enregistrer() {
-        const tableau = document.getElementById("corpTableauBlague")
-        var lignes = tableau.children;
-        var blagueEnregistrer = [];
-    
-        for (var i = 0; i < lignes.length; i++) {
-            var colonnes = lignes[i].children;
-            colonnes[0].innerHTML = lignes.length - i;
-            const blagueEnreg = {
-                blague: colonnes[1].innerHTML,
-                reponse: colonnes[6].innerHTML
+
+        for (let ind = 0; ind < this.tabBlague.length; ind++) {
+            if (this.tabBlague[ind].infoBlague.id === idBlague) {
+                this.tabBlague[ind].infoBlague.elementLigneHTML.ligne.remove();
+                this.tabBlague.splice(ind, 1);
+                this.enregistrer();
+                break;
             }
-            blagueEnregistrer.push(blagueEnreg)
         }
-        window.localStorage.setItem("blague", JSON.stringify(blagueEnregistrer));
+    }
+
+    // supprimme tout le tableau
+    supprimerTout() {
+        this.tableau.innerHTML = "";
+        this.tabBlague = [];
+        this.enregistrer();
+    }
+
+    // ajoute des blague dans une liste noire
+    async ajoutListeNoire(idBlague) {
+        await this.SelectionneBlague(idBlague)
+            .then(BlagueBan => {
+                const BlagueBanEreng = { BlagueBan }
+                this.tabListeBlagueNoire.push(BlagueBanEreng);
+                this.supprimerBlague(idBlague);
+                this.enregistrer();
+            });
+
+    }
+
+    // enregistre dans le localStorage du navigateur
+    enregistrer() {
+        this.rechargeNumBlague()
+        window.localStorage.setItem("blague", JSON.stringify(this.tabBlague));
+        window.localStorage.setItem("listeBlagueNoire", JSON.stringify(this.tabListeBlagueNoire));
+    }
+
+    // recharge tout les numéro des blagues pour avoir une belle suite de nombre décroissant
+    rechargeNumBlague() {
+        const lignes = this.tableau.children;
+
+        for (var i = 0; i < lignes.length; i++) {
+            const colonnes = lignes[i].children;
+            colonnes[0].innerHTML = lignes.length - i;
+        }
+    }
+
+    voirTout() {
+        for (let ind = 0; ind < this.tabBlague.length; ind++) {
+            this.tabBlague[ind].infoBlague.elementLigneHTML.Response.innerHTML = this.tabBlague[ind].infoBlague.delivery;
+            this.tabBlague.splice(ind, 1);
+            this.enregistrer();
+            break;
+        }
     }
 }
 
-var MesBlague = new Blague;
+window.onload = function() {
+    MesBlague = new Blague;
+}

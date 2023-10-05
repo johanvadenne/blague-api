@@ -11,7 +11,8 @@
 
 <body>
     <button onclick="MesBlague.uneNouvelleBlague()">une autre</button>
-    <button onclick="supprimerTout()">supprimer tout</button>
+    <button onclick="MesBlague.supprimerTout()">supprimer tout</button>
+    <input type="checkbox" onclick="MesBlague.voirTout()">voir toute les réponses</button>
     <script src="assets/script.js"></script>
     <table class="table">
         <thead>
@@ -21,8 +22,6 @@
             <th>Voir</th>
             <th>Supprimer</th>
             <th>Ajouter dans la liste noire</th>
-            <th class="cacher">RéponseCacher</th>
-            <th class="cacher">Id</th>
         </thead>
         <tbody id="corpTableauBlague">
 
