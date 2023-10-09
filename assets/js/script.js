@@ -1,12 +1,12 @@
-
-
-// init
+// FR: Initialisation
+// EN: Initialization
 const urlBlague = "https://v2.jokeapi.dev/joke/Any?lang=fr"
-const recupBlague = JSON.parse(localStorage.getItem("blague"));
-console.log(recupBlague); // à retirer
-const recupBlagueBanni = JSON.parse(localStorage.getItem("listeBlagueNoire"));
-console.log(recupBlagueBanni); // à retirer
 var MesBlague;
+
+// FR : Récupère les données stockées dans le navigateur.
+// EN : Retrieve data stored in the browser.
+const recupBlague = JSON.parse(localStorage.getItem("blague"));
+const recupBlagueBanni = JSON.parse(localStorage.getItem("listeBlagueNoire"));
 
 
 class API {
@@ -32,12 +32,14 @@ class API {
 }
 
 
+// FR: Classe "Blague" qui hérite de "API"
+// EN: Class "Joke" that inherits from "API"
 class Blague extends API {
 
-    // init
+    // FR: Initialisation
+    // EN: Initialization
     constructor() {
         super();
-        this.numBlague = 0;
         this.tabBlague = [];
         this.tabListeBlagueNoire = [];
         this.tableau = document.getElementById("corpTableauBlague")
@@ -45,7 +47,8 @@ class Blague extends API {
         this.chergementBlagueStocker();
     }
 
-    // affiche les blague en mémoire
+    // FR: Charge les blagues stockées dans des tableaux.
+    // EN: Loads the jokes stored in arrays.
     chergementBlagueStocker() {
         if (recupBlagueBanni != null) {
             this.tabListeBlagueNoire.push(recupBlagueBanni);
@@ -56,31 +59,34 @@ class Blague extends API {
                 this.afficheBlague(recupBlague[ind].infoBlague);
             }
         }
-
-        
     }
 
-    // rajoute une nouvelle blague
+    // FR: Affiche la blague envoyée dans un tableau HTML.
+    // EN: Displays the sent joke in an HTML table.
     afficheBlague(blague) {
 
+        // FR: Si la blague est dans la liste noire, chercher une nouvelle blague
+        // EN: If the joke is in the blacklist, look for a new joke
         if (this.tabListeBlagueNoire.find((blagueAjoutTest) => blagueAjoutTest.id === blague.id)) {
             this.uneNouvelleBlague();
-            console.log("123456789")
             return;
         }
 
-        // incrémente de un 
-        this.numBlague++;
-
-        // récupère le corp du tableau
+        // FR: Récupère le corps du tableau
+        // EN: Retrieve the table body
         const tableau = document.getElementById("corpTableauBlague");
 
-        // créer une ligne
+        // FR: Créer une ligne
+        // EN: Create a row
         const nouvelleLigne = tableau.insertRow(0);
-        // attribut un id
-        nouvelleLigne.id = "ligneBlague" + this.numBlague;
 
-        // insert les colonnes
+        // FR: Attribuer un ID
+        // EN: Assign an ID
+
+        nouvelleLigne.id = "ligneBlague" + blague.id;
+
+        // FR: Insère les colonnes
+        // EN: Insert the columns
         const nouvelleLigneNumero = nouvelleLigne.insertCell();
         const nouvelleLigneBlague = nouvelleLigne.insertCell();
         const nouvelleLigneReponse = nouvelleLigne.insertCell();
@@ -88,12 +94,15 @@ class Blague extends API {
         const nouvelleLigneSupprimer = nouvelleLigne.insertCell();
         const nouvelleLigneAjouterDansLaListeNoire = nouvelleLigne.insertCell();
 
-        // créée l'input de type checkbox
+        // FR: Crée l'input de type checkbox
+        // EN: Create a checkbox input
+
         const imgVoir = document.createElement("img");
         imgVoir.className = "oeil";
         nouvelleLigneVoir.appendChild(imgVoir);
 
-        // créée des bouton// Créer des boutons pour les colonnes "Supprimer" et "Ajouter dans la liste noire"
+        // FR: Créer les boutons pour les colonnes "Supprimer" et "Ajouter dans la liste noire"
+        // EN: Create buttons for the "Delete" and "Add to Blacklist" columns
         const boutonSupprimer = document.createElement("button");
         const boutonAjouterListeNoire = document.createElement("button");
         boutonSupprimer.className = "btn btn-danger mb-3"
@@ -101,19 +110,22 @@ class Blague extends API {
         nouvelleLigneSupprimer.appendChild(boutonSupprimer);
         nouvelleLigneAjouterDansLaListeNoire.appendChild(boutonAjouterListeNoire);
 
-        // ajout un écouteur onclick
-        imgVoir.onclick = () => MesBlague.cacher(blague.id);
+        // FR: Ajoute un écouteur
+        // EN: Add an event listener
+        imgVoir.onclick = () => MesBlague.cacherOuAffiche(blague.id);
         boutonSupprimer.onclick = () => MesBlague.supprimerBlague(blague.id);
         boutonAjouterListeNoire.onclick = () => MesBlague.ajoutListeNoire(blague.id);
 
-        // insert les textes
-        nouvelleLigneNumero.innerHTML = this.numBlague;
+        // FR: Insère les textes
+        // EN: Insert the texts
+        nouvelleLigneNumero.innerHTML = blague.id;
         nouvelleLigneBlague.innerHTML = blague.setup;
         const reponseCacher = "*".repeat(blague.delivery.length);
         boutonSupprimer.innerHTML = "supprimer";
         boutonAjouterListeNoire.innerHTML = "Ajouter dans la liste noire";
 
-
+        // FR: Vérifie si la visualisation des blagues est activée pour décider d'afficher ou de cacher la blague
+        // EN: Check if joke visibility is enabled to decide whether to show or hide the joke
         if (this.imgVoirTout.src.indexOf("images/oeilOuvert.png") != -1) {
             nouvelleLigneReponse.innerHTML = blague.delivery;
             imgVoir.src = "./assets/images/oeilOuvert.png";
@@ -122,20 +134,9 @@ class Blague extends API {
             imgVoir.src = "./assets/images/oeilFermer.png";
         }
 
-        imgVoir.addEventListener("click", (event) => {
-            console.log(imgVoir.src)
-            if (imgVoir.src.indexOf("images/oeilOuvert.png") != -1) {
-                imgVoir.src = "./assets/images/oeilFermer.png";
-                console.log("1")
-            }
-            else {
-                imgVoir.src = "./assets/images/oeilOuvert.png";
-                console.log("2")
-            }
-        });
-          
 
-        // enregistre les information dans un tableau
+        // FR: Enregistre les informations dans un tableau
+        // EN: Save the information in an array
         const infoBlague = {
             setup: blague.setup,
             delivery: blague.delivery,
@@ -152,12 +153,14 @@ class Blague extends API {
             }
         }
 
-        // enregistrement
+        // FR: Enregistrement
+        // EN: Saving
         this.tabBlague.push({ infoBlague });
         this.enregistrer();
     }
 
-    // effectue une requette GET a jokeapi
+    // FR: Effectue une requête GET à jokeapi
+    // EN: Makes a GET request to jokeapi
     uneNouvelleBlague() {
         this.appelleAPI(urlBlague)
             .then(blague => {
@@ -165,7 +168,8 @@ class Blague extends API {
             });
     }
 
-    // selectionne la blague selectionné
+    // FR: Renvoie les informations de la blague selon l'ID
+    // EN: Returns the information of the joke based on the ID
     SelectionneBlague(idBlague) {
         return new Promise((resolve, reject) => {
             if (this.blagueTrouver) {
@@ -181,27 +185,33 @@ class Blague extends API {
         });
     }
 
-    // renvoie la valeur booléen de la checkbox
+    // FR: Renvoie vrai si l'œil est ouvert
+    // EN: Returns true if the eye is open
     imgVoir(idBlague) {
         return this.SelectionneBlague(idBlague)
             .then(() => {
-                return this.blagueTrouver.elementLigneHTML.Voir.src.indexOf("images/oeilOuvert.png") == -1
+                return this.blagueTrouver.elementLigneHTML.Voir.src.indexOf("images/oeilOuvert.png") != -1
             })
     }
 
-    async cacher(idBlague) {
+    // FR: Cache ou affiche la réponse de la question
+    // EN: Hide or show the answer to the question
+    async cacherOuAffiche(idBlague) {
         const blague = await this.SelectionneBlague(idBlague);
 
+        // FR: Si l'œil est ouvert, alors le fermer
+        // EN: If the eye is open, then close it
         if (await this.imgVoir(idBlague)) {
-            blague.elementLigneHTML.Reponse.innerHTML = blague.delivery;
-            this.enregistrer()
-        } else {
             blague.elementLigneHTML.Reponse.innerHTML = blague.reponseCacher;
-            this.enregistrer()
+            blague.elementLigneHTML.Voir.src = "./assets/images/oeilFermer.png";
+        } else {
+            blague.elementLigneHTML.Reponse.innerHTML = blague.delivery;
+            blague.elementLigneHTML.Voir.src = "./assets/images/oeilOuvert.png";
         }
     }
 
-    // supprimer une ligne
+    // FR: Supprime une blague
+    // EN: Delete a joke
     supprimerBlague(idBlague) {
 
         for (let ind = 0; ind < this.tabBlague.length; ind++) {
@@ -214,14 +224,16 @@ class Blague extends API {
         }
     }
 
-    // supprimme tout le tableau
+    // FR: Supprime tout le tableau
+    // EN: Delete the entire table
     supprimerTout() {
         this.tableau.innerHTML = "";
         this.tabBlague = [];
         this.enregistrer();
     }
 
-    // ajoute des blague dans une liste noire
+    // FR: Ajoute des blagues dans une liste noire
+    // EN: Add jokes to a blacklist
     async ajoutListeNoire(idBlague) {
         await this.SelectionneBlague(idBlague)
             .then(BlagueBan => {
@@ -233,14 +245,16 @@ class Blague extends API {
 
     }
 
-    // enregistre dans le localStorage du navigateur
+    // FR: Enregistre dans le localStorage du navigateur
+    // EN: Save in the browser's localStorage
     enregistrer() {
         this.rechargeNumBlague()
         window.localStorage.setItem("blague", JSON.stringify(this.tabBlague));
         window.localStorage.setItem("listeBlagueNoire", JSON.stringify(this.tabListeBlagueNoire));
     }
 
-    // recharge tout les numéro des blagues pour avoir une belle suite de nombre décroissant
+    // FR: Recharge tous les numéros des blagues pour avoir une belle suite de nombres décroissants
+    // EN: Reloads all joke numbers to have a nice sequence of descending numbers
     rechargeNumBlague() {
         const lignes = this.tableau.children;
 
@@ -250,6 +264,8 @@ class Blague extends API {
         }
     }
 
+    // FR: Affiche ou non toutes les réponses des blagues
+    // EN: Show or hide all joke answers
     voirTout() {
         if (this.imgVoirTout.src.indexOf("images/oeilFermer.png") != -1) {
             for (let ind = 0; ind < this.tabBlague.length; ind++) {
@@ -268,6 +284,8 @@ class Blague extends API {
         }
     }
 
+    // FR: Efface toutes les données
+    // EN: Clear all data
     reinisialiser() {
         localStorage.removeItem("blague");
         localStorage.removeItem("listeBlagueNoire");
@@ -275,14 +293,13 @@ class Blague extends API {
     }
 }
 
-window.onload = function() {
-    try {
-        MesBlague = new Blague;
-    }
-    catch(erreur) {
-        localStorage.removeItem("blague");
-        localStorage.removeItem("listeBlagueNoire");
-        console.log("erreur: "+ erreur)
-    }
-    
+
+try {
+    MesBlague = new Blague;
+} catch (erreur) {
+    // FR: Par prévention, une réinitialisation de toutes les données est effectuée
+    // EN: As a precaution, a reset of all data is performed
+    localStorage.removeItem("blague");
+    localStorage.removeItem("listeBlagueNoire");
+    console.log("erreur: " + erreur)
 }
