@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blague API</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="assets/css/style.css" rel="stylesheet">
 
 </head>
@@ -15,11 +16,12 @@
 
     <h1>Mes meilleurs blagues 🤣</h1>
 
-    <div id="contenat_bouton">
+    <div id="conteneur_bouton">
         <button id="je_veux_une_blague" onclick="MesBlague.uneNouvelleBlague()" class="btn btn-primary mb-3 bouton_action">Je veux une blague</button>
         <button onclick="MesBlague.supprimerTout()" class="btn btn-danger mb-3 bouton_action">supprimer tout</button>
         <button onclick="MesBlague.reinisialiser()" class="btn btn-warning mb-3 bouton_action">réinisialiser</button>
-        <img class="oeil bouton_action" id="voir_tout" onclick="MesBlague.voirTout()" src="./assets/images/oeilFermer.png">
+        <img class="oeil bouton_action" id="voir_tout" onclick="MesBlague.voirTout()"
+            src="./assets/images/oeilFermer.png">
     </div>
 
     <table class="table table-dark table-striped">
@@ -29,6 +31,7 @@
             <th>Blague</th>
             <th>Réponse</th>
             <th>Voir</th>
+            <th>Note ⭐</th>
             <th>Supprimer</th>
             <th>Ajouter dans la liste noire</th>
         </thead>
@@ -38,8 +41,28 @@
 
     </table>
 
+    <section id="conteneur_popup">
+        <div id="popup_notation">
+            <h2 class="titre_popup">Comment à tu trouver cette blague?🧐</h2>
+            <div class="rating rating2">
+                <a href="#5" onclick="MesBlague.ChangeNote(5)" title="Give 5 stars">★</a>
+                <a href="#4" onclick="MesBlague.ChangeNote(4)" title="Give 4 stars">★</a>
+                <a href="#3" onclick="MesBlague.ChangeNote(3)" title="Give 3 stars">★</a>
+                <a href="#2" onclick="MesBlague.ChangeNote(2)" title="Give 2 stars">★</a>
+                <a href="#1" onclick="MesBlague.ChangeNote(1)" title="Give 1 star">★</a>
+            </div>
+            <div class="bouton_popup">
+                <button onclick="MesBlague.enregistreNote(5)" id="je_veux_une_blague" class="btn btn-primary mb-3 bouton_action">enregistrer</button>
+                <button onclick="MesBlague.annuleNotation()" class="btn btn-danger mb-3 bouton_action">annuler</button>
+            </div>
+        </div>
+    </section>
+
+
     <script src="assets/js/script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 
 </body>
 

@@ -44,6 +44,9 @@ class Blague extends API {
         this.tabListeBlagueNoire = [];
         this.tableau = document.getElementById("corpTableauBlague")
         this.imgVoirTout = document.getElementById("voir_tout")
+        this.conteneurPopup = document.getElementById("conteneur_popup")
+        this.popupNotation = document.getElementById("popup_notation")
+        this.noteBlagueTemp = "0/5⭐";
         this.chergementBlagueStocker();
     }
 
@@ -72,6 +75,12 @@ class Blague extends API {
             return;
         }
 
+        let notation = "Aucun";
+        console.log(blague.noteBlague != undefined);
+        if (blague.noteBlague != undefined) {
+            notation = blague.noteBlague;
+        }
+
         // FR: Récupère le corps du tableau
         // EN: Retrieve the table body
         const tableau = document.getElementById("corpTableauBlague");
@@ -91,36 +100,42 @@ class Blague extends API {
         const nouvelleLigneBlague = nouvelleLigne.insertCell();
         const nouvelleLigneReponse = nouvelleLigne.insertCell();
         const nouvelleLigneVoir = nouvelleLigne.insertCell();
+        const nouvelleLigneNotation = nouvelleLigne.insertCell();
         const nouvelleLigneSupprimer = nouvelleLigne.insertCell();
         const nouvelleLigneAjouterDansLaListeNoire = nouvelleLigne.insertCell();
 
         // FR: Crée l'input de type checkbox
         // EN: Create a checkbox input
-
         const imgVoir = document.createElement("img");
-        imgVoir.className = "oeil";
         nouvelleLigneVoir.appendChild(imgVoir);
 
         // FR: Créer les boutons pour les colonnes "Supprimer" et "Ajouter dans la liste noire"
         // EN: Create buttons for the "Delete" and "Add to Blacklist" columns
         const boutonSupprimer = document.createElement("button");
         const boutonAjouterListeNoire = document.createElement("button");
-        boutonSupprimer.className = "btn btn-danger mb-3"
-        boutonAjouterListeNoire.className = "btn btn-dark mb-3"
         nouvelleLigneSupprimer.appendChild(boutonSupprimer);
         nouvelleLigneAjouterDansLaListeNoire.appendChild(boutonAjouterListeNoire);
+
+        // FR: attribution des classes
+        // EN: class assignment
+        imgVoir.className = "oeil";
+        boutonSupprimer.className = "btn btn-danger mb-3";
+        boutonAjouterListeNoire.className = "btn btn-dark mb-3";
+        nouvelleLigneNotation.className = "notation";
 
         // FR: Ajoute un écouteur
         // EN: Add an event listener
         imgVoir.onclick = () => MesBlague.cacherOuAffiche(blague.id);
         boutonSupprimer.onclick = () => MesBlague.supprimerBlague(blague.id);
         boutonAjouterListeNoire.onclick = () => MesBlague.ajoutListeNoire(blague.id);
+        nouvelleLigneNotation.onclick = () => MesBlague.afficheNotation(blague.id);
 
         // FR: Insère les textes
         // EN: Insert the texts
         nouvelleLigneNumero.innerHTML = blague.id;
         nouvelleLigneBlague.innerHTML = blague.setup;
         const reponseCacher = "*".repeat(blague.delivery.length);
+        nouvelleLigneNotation.innerHTML = notation;
         boutonSupprimer.innerHTML = "supprimer";
         boutonAjouterListeNoire.innerHTML = "Ajouter dans la liste noire";
 
@@ -142,12 +157,14 @@ class Blague extends API {
             delivery: blague.delivery,
             reponseCacher: reponseCacher,
             id: blague.id,
+            noteBlague: notation,
             elementLigneHTML: {
                 ligne: nouvelleLigne,
                 Numero: nouvelleLigneNumero,
                 Blague: nouvelleLigneBlague,
                 Reponse: nouvelleLigneReponse,
                 Voir: imgVoir,
+                Notation: nouvelleLigneNotation,
                 Supprimer: nouvelleLigneSupprimer,
                 DansLaListeNoire: nouvelleLigneAjouterDansLaListeNoire,
             }
@@ -197,8 +214,6 @@ class Blague extends API {
     // FR: Cache ou affiche la réponse de la question
     // EN: Hide or show the answer to the question
     async cacherOuAffiche(idBlague) {
-        const blague = await this.SelectionneBlague(idBlague);
-
         // FR: Si l'œil est ouvert, alors le fermer
         // EN: If the eye is open, then close it
         if (await this.imgVoir(idBlague)) {
@@ -290,6 +305,45 @@ class Blague extends API {
         localStorage.removeItem("blague");
         localStorage.removeItem("listeBlagueNoire");
         this.supprimerTout();
+    }
+
+
+    // FR: affiche la popup de notation
+    // EN: displays the notation popup
+    afficheNotation(idBlague) {
+        this.SelectionneBlague(idBlague)
+        this.popupNotation.style.display = "block";
+        this.conteneurPopup.style.zIndex = 1;
+        this.noteBlagueTemp = "0/5⭐";
+
+    }
+
+    // FR: retire la popup
+    // EN: remove popup
+    annuleNotation() {
+
+        this.popupNotation.style.display = "none";
+        this.conteneurPopup.style.zIndex = -1;
+        this.noteBlagueTemp = "0/5⭐";
+
+    }
+
+    ChangeNote(note) {
+        this.noteBlagueTemp = note+"/5⭐";
+    }
+
+    
+    // FR: enregistre la note
+    // EN: saves the note
+    async enregistreNote() {
+
+        this.popupNotation.style.display = "none";
+        this.conteneurPopup.style.zIndex = -1;
+        this.blagueTrouver.elementLigneHTML.Notation.innerHTML = this.noteBlagueTemp;
+        this.blagueTrouver.noteBlague = this.noteBlagueTemp;
+        this.noteBlagueTemp = "0/5⭐";
+        this.enregistrer();
+
     }
 }
 
