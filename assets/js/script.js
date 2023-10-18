@@ -44,9 +44,12 @@ class Blague extends API {
         this.tabListeBlagueNoire = [];
         this.tableau = document.getElementById("corpTableauBlague")
         this.imgVoirTout = document.getElementById("voir_tout")
+        this.trier = document.getElementById("trier")
+        this.trierBool = false;
         this.conteneurPopup = document.getElementById("conteneur_popup")
         this.popupNotation = document.getElementById("popup_notation")
         this.noteBlagueTemp = "0/5⭐";
+        this.trier.style.backgroundColor = "rgba(255, 255, 255, 0)";
         this.chergementBlagueStocker();
     }
 
@@ -59,6 +62,7 @@ class Blague extends API {
 
         if (recupBlague != null) {
             for (let ind = 0; ind < recupBlague.length; ind++) {
+                console.log("1");
                 this.afficheBlague(recupBlague[ind].infoBlague);
             }
         }
@@ -66,17 +70,17 @@ class Blague extends API {
 
     // FR: Affiche la blague envoyée dans un tableau HTML.
     // EN: Displays the sent joke in an HTML table.
-    afficheBlague(blague) {
+    afficheBlague(blague, enregistrer=true) {
 
         // FR: Si la blague est dans la liste noire, chercher une nouvelle blague
         // EN: If the joke is in the blacklist, look for a new joke
         if (this.tabListeBlagueNoire.find((blagueAjoutTest) => blagueAjoutTest.id === blague.id)) {
+            console.log("2");
             this.uneNouvelleBlague();
             return;
         }
 
-        let notation = "Aucun";
-        console.log(blague.noteBlague != undefined);
+        let notation = "0/5⭐";
         if (blague.noteBlague != undefined) {
             notation = blague.noteBlague;
         }
@@ -149,31 +153,33 @@ class Blague extends API {
             imgVoir.src = "./assets/images/oeilFermer.png";
         }
 
-
-        // FR: Enregistre les informations dans un tableau
-        // EN: Save the information in an array
-        const infoBlague = {
-            setup: blague.setup,
-            delivery: blague.delivery,
-            reponseCacher: reponseCacher,
-            id: blague.id,
-            noteBlague: notation,
-            elementLigneHTML: {
-                ligne: nouvelleLigne,
-                Numero: nouvelleLigneNumero,
-                Blague: nouvelleLigneBlague,
-                Reponse: nouvelleLigneReponse,
-                Voir: imgVoir,
-                Notation: nouvelleLigneNotation,
-                Supprimer: nouvelleLigneSupprimer,
-                DansLaListeNoire: nouvelleLigneAjouterDansLaListeNoire,
+        if (enregistrer) {
+            // FR: Enregistre les informations dans un tableau
+            // EN: Save the information in an array
+            const infoBlague = {
+                setup: blague.setup,
+                delivery: blague.delivery,
+                reponseCacher: reponseCacher,
+                id: blague.id,
+                noteBlague: notation,
+                elementLigneHTML: {
+                    ligne: nouvelleLigne,
+                    Numero: nouvelleLigneNumero,
+                    Blague: nouvelleLigneBlague,
+                    Reponse: nouvelleLigneReponse,
+                    Voir: imgVoir,
+                    Notation: nouvelleLigneNotation,
+                    Supprimer: nouvelleLigneSupprimer,
+                    DansLaListeNoire: nouvelleLigneAjouterDansLaListeNoire,
+                }
             }
+
+            // FR: Enregistrement
+            // EN: Saving
+            this.tabBlague.push({ infoBlague });
+            this.enregistrer();
         }
 
-        // FR: Enregistrement
-        // EN: Saving
-        this.tabBlague.push({ infoBlague });
-        this.enregistrer();
     }
 
     // FR: Effectue une requête GET à jokeapi
@@ -214,12 +220,14 @@ class Blague extends API {
     // FR: Cache ou affiche la réponse de la question
     // EN: Hide or show the answer to the question
     async cacherOuAffiche(idBlague) {
+        const blague = await this.SelectionneBlague(idBlague);
         // FR: Si l'œil est ouvert, alors le fermer
         // EN: If the eye is open, then close it
         if (await this.imgVoir(idBlague)) {
             blague.elementLigneHTML.Reponse.innerHTML = blague.reponseCacher;
-            blague.elementLigneHTML.Voir.src = "./assets/images/oeilFermer.png";
+            this.blagueTrouver.elementLigneHTML.Voir.src = "./assets/images/oeilFermer.png";
         } else {
+            console.log(blague)
             blague.elementLigneHTML.Reponse.innerHTML = blague.delivery;
             blague.elementLigneHTML.Voir.src = "./assets/images/oeilOuvert.png";
         }
@@ -343,7 +351,41 @@ class Blague extends API {
         this.blagueTrouver.noteBlague = this.noteBlagueTemp;
         this.noteBlagueTemp = "0/5⭐";
         this.enregistrer();
+        console.log(this.blagueTrouver);
 
+    }
+
+    trie(boutonTrier = false) {
+
+        if ((this.trier.style.backgroundColor == "rgba(255, 255, 255, 0)") && boutonTrier) {
+            
+            this.trier.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.trieLesLigne();
+
+        } 
+        else if ((this.trier.style.backgroundColor == "rgba(255, 255, 255, 0.5)") && boutonTrier) {
+            this.trier.style.backgroundColor = "rgba(255, 255, 255, 0)";
+        } 
+        else if (this.trier.style.backgroundColor == "rgba(255, 255, 255, 0.5)") {
+            this.trieLesLigne();
+        }
+    }
+
+    trieLesLigne() {
+        this.tabBlague.sort((a, b) => {
+            return a.infoBlague.noteBlague.localeCompare(b.infoBlague.noteBlague);
+        });
+        this.enregistrer();
+        this.tableau.innerHTML = "";
+        
+        const tabBlagueTemp = this.tabBlague.slice();
+        this.tabBlague = [];
+        
+        for (let ind = 0; ind < tabBlagueTemp.length; ind++) {
+            this.afficheBlague(tabBlagueTemp[ind].infoBlague);
+        }
+        
+        this.enregistrer();
     }
 }
 
