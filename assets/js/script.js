@@ -1,6 +1,6 @@
 // FR: Initialisation
 // EN: Initialization
-const urlBlague = "https://v2.jokeapi.dev/joke/Any?lang=fr"
+const urlBlague = "https://v2.jokeapi.dev/joke/Any?lang=fr&blacklistFlags=nsfw,religious,political,racist,sexist,explicit"
 var MesBlague;
 
 // FR : Récupère les données stockées dans le navigateur.
